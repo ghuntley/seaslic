@@ -1,7 +1,7 @@
 # Here's the story...
 
 - Computer purchased with w/Windows 7 preinstalled.
-- Preferred development enviornment is linux.
+- Preferred development environment is linux.
 - Sometimes have to do development in windows.
 
 # Problem:
