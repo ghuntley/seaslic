@@ -1,8 +1,9 @@
---- seabios.submodule/src/acpi.c
-+++ seabios.submodule/src/acpi.c
-@@ -199,4 +199,9 @@ struct srat_memory_affinity
+--- seabios.submodule/src/acpi.c    2012-04-15 08:27:40.000000000 +0600
++++ seabios.submodule/src/acpi.c    2012-05-05 01:52:07.000000000 +0600
+@@ -212,6 +212,11 @@
+ 
  #include "acpi-dsdt.hex"
-
+ 
 +#define CONFIG_OEM_SLIC
 +#ifdef CONFIG_OEM_SLIC
 +#include "acpi-slic.hex"
@@ -10,18 +11,22 @@
 +
  static void
  build_header(struct acpi_table_header *h, u32 sig, int len, u8 rev)
-@@ -211,4 +216,8 @@ build_header(struct acpi_table_header *h, u32 sig, int len, u8 rev)
+ {
+@@ -224,6 +229,10 @@
      h->oem_revision = cpu_to_le32(1);
+     memcpy(h->asl_compiler_id, CONFIG_APPNAME4, 4);
      h->asl_compiler_revision = cpu_to_le32(1);
 +#ifdef CONFIG_OEM_SLIC
-+    if (sig == RSDT_SIGNATURE)	// only RSDT is checked by win7 & vista
++    if (sig == RSDT_SIGNATURE)    // only RSDT is checked by win7 & vista
 +      memcpy(h->oem_id, ((struct acpi_table_header*)SLIC)->oem_id, 14);
 +#endif
      h->checksum -= checksum(h, len);
  }
-@@ -627,4 +636,15 @@ acpi_bios_init(void)
+ 
+@@ -709,6 +718,17 @@
      ACPI_INIT_TABLE(build_srat());
-
+     ACPI_INIT_TABLE(build_pcihp());
+ 
 +#ifdef CONFIG_OEM_SLIC
 +    { void *buf = malloc_high(sizeof(SLIC));
 +      if (!buf)
@@ -33,5 +38,6 @@
 +    }
 +#endif
 +
-     u16 i, external_tables = qemu_cfg_acpi_additional_tables()
-
+     u16 i, external_tables = qemu_cfg_acpi_additional_tables();
+ 
+     for (i = 0; i < external_tables; i++) {
