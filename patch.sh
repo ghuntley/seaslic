@@ -9,6 +9,7 @@ echo retrieve the latest seabios from upstream git repo.
 echo $HEADER
 echo
 
+git submodule init
 git submodule sync
 git submodule update
 
