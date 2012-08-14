@@ -32,7 +32,8 @@ echo patching seabios...
 echo $HEADER
 echo
 
-patch seabios.submodule/src/acpi.c seabios.patch
+cd seabios.submodule
+patch -p1 < ../seabios.patch
 
 echo
 echo $HEADER
@@ -40,7 +41,6 @@ echo compiling seabios...
 echo $HEADER
 echo
 
-cd seabios.submodule
 make
 
 echo

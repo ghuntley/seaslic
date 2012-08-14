@@ -1,6 +1,8 @@
---- seabios.submodule/src/acpi.c    2012-04-15 08:27:40.000000000 +0600
-+++ seabios.submodule/src/acpi.c    2012-05-05 01:52:07.000000000 +0600
-@@ -212,6 +212,11 @@
+diff --git a/src/acpi.c b/src/acpi.c
+index 6428d9c..10ce5e8 100644
+--- a/src/acpi.c
++++ b/src/acpi.c
+@@ -198,6 +198,11 @@ struct srat_memory_affinity
  
  #include "acpi-dsdt.hex"
  
@@ -12,9 +14,9 @@
  static void
  build_header(struct acpi_table_header *h, u32 sig, int len, u8 rev)
  {
-@@ -224,6 +229,10 @@
+@@ -210,6 +215,10 @@ build_header(struct acpi_table_header *h, u32 sig, int len, u8 rev)
+     memcpy(h->oem_table_id + 4, (void*)&sig, 4);
      h->oem_revision = cpu_to_le32(1);
-     memcpy(h->asl_compiler_id, CONFIG_APPNAME4, 4);
      h->asl_compiler_revision = cpu_to_le32(1);
 +#ifdef CONFIG_OEM_SLIC
 +    if (sig == RSDT_SIGNATURE)    // only RSDT is checked by win7 & vista
@@ -23,9 +25,9 @@
      h->checksum -= checksum(h, len);
  }
  
-@@ -709,6 +718,17 @@
+@@ -626,6 +635,17 @@ acpi_bios_init(void)
+     ACPI_INIT_TABLE(build_hpet());
      ACPI_INIT_TABLE(build_srat());
-     ACPI_INIT_TABLE(build_pcihp());
  
 +#ifdef CONFIG_OEM_SLIC
 +    { void *buf = malloc_high(sizeof(SLIC));
@@ -40,4 +42,42 @@
 +
      u16 i, external_tables = qemu_cfg_acpi_additional_tables();
  
-     for (i = 0; i < external_tables; i++) {
+     for(i = 0; i < external_tables; i++) {
+diff --git a/src/ahci.c b/src/ahci.c
+index b820e28..9c4315f 100644
+--- a/src/ahci.c
++++ b/src/ahci.c
+@@ -408,7 +408,6 @@ static void
+ ahci_detect(void *data)
+ {
+     struct ahci_ctrl_s *ctrl = data;
+-    struct ahci_port_s *port;
+     u32 pnr, max;
+     int rc;
+ 
+@@ -422,7 +421,7 @@ ahci_detect(void *data)
+         dprintf(1, "AHCI/%d: link %s\n", pnr, rc == 0 ? "up" : "down");
+         if (rc != 0)
+             continue;
+-        port = ahci_port_init(ctrl, pnr);
++        ahci_port_init(ctrl, pnr);
+     }
+ }
+ 
+diff --git a/src/bregs.h b/src/bregs.h
+index 9a381d0..f026fa8 100644
+--- a/src/bregs.h
++++ b/src/bregs.h
+@@ -37,9 +37,9 @@
+ struct bregs {
+     u16 ds;
+     u16 es;
+-    UREG(edi, di, di_hi, di_lo);
+-    UREG(esi, si, si_hi, si_lo);
+-    UREG(ebp, bp, bp_hi, bp_lo);
++    UREG(edi, di, di8u, di8l);
++    UREG(esi, si, si8u, si8l);
++    UREG(ebp, bp, bp8u, bp8l);
+     UREG(ebx, bx, bh, bl);
+     UREG(edx, dx, dh, dl);
+     UREG(ecx, cx, ch, cl);
