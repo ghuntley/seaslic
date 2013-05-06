@@ -1,8 +1,6 @@
-diff --git a/src/acpi.c b/src/acpi.c
-index 6428d9c..10ce5e8 100644
---- a/src/acpi.c
-+++ b/src/acpi.c
-@@ -198,6 +198,11 @@ struct srat_memory_affinity
+--- a/src/acpi.c	2013-01-19 06:44:54.000000000 +0600
++++ b/src/acpi.c	2013-05-07 01:16:30.000000000 +0600
+@@ -214,6 +214,11 @@
  
  #include "acpi-dsdt.hex"
  
@@ -14,70 +12,30 @@ index 6428d9c..10ce5e8 100644
  static void
  build_header(struct acpi_table_header *h, u32 sig, int len, u8 rev)
  {
-@@ -210,6 +215,10 @@ build_header(struct acpi_table_header *h, u32 sig, int len, u8 rev)
-     memcpy(h->oem_table_id + 4, (void*)&sig, 4);
+@@ -226,6 +231,10 @@
      h->oem_revision = cpu_to_le32(1);
+     memcpy(h->asl_compiler_id, CONFIG_APPNAME4, 4);
      h->asl_compiler_revision = cpu_to_le32(1);
-+#ifdef CONFIG_OEM_SLIC
-+    if (sig == RSDT_SIGNATURE)    // only RSDT is checked by win7 & vista
-+      memcpy(h->oem_id, ((struct acpi_table_header*)SLIC)->oem_id, 14);
-+#endif
++    #ifdef CONFIG_OEM_SLIC
++    if (sig == RSDT_SIGNATURE) // only RSDT is checked by win7 & vista
++	memcpy(h->oem_id, ((struct acpi_table_header*)SLIC)->oem_id, 14);
++    #endif
      h->checksum -= checksum(h, len);
  }
  
-@@ -626,6 +635,17 @@ acpi_bios_init(void)
-     ACPI_INIT_TABLE(build_hpet());
+@@ -827,6 +836,15 @@
      ACPI_INIT_TABLE(build_srat());
+     if (pci->device == PCI_DEVICE_ID_INTEL_ICH9_LPC)
+         ACPI_INIT_TABLE(build_mcfg_q35());
++    #ifdef CONFIG_OEM_SLIC
++	void *buf = malloc_high(sizeof(SLIC));
++	if (!buf)
++	    warn_noalloc();
++	else {
++	    memcpy(buf, SLIC, sizeof(SLIC));
++	    ACPI_INIT_TABLE(buf);
++	}
++    #endif
  
-+#ifdef CONFIG_OEM_SLIC
-+    { void *buf = malloc_high(sizeof(SLIC));
-+      if (!buf)
-+        warn_noalloc();
-+      else {
-+        memcpy(buf, SLIC, sizeof(SLIC));
-+        ACPI_INIT_TABLE(buf);
-+      }
-+    }
-+#endif
-+
      u16 i, external_tables = qemu_cfg_acpi_additional_tables();
  
-     for(i = 0; i < external_tables; i++) {
-diff --git a/src/ahci.c b/src/ahci.c
-index b820e28..9c4315f 100644
---- a/src/ahci.c
-+++ b/src/ahci.c
-@@ -408,7 +408,6 @@ static void
- ahci_detect(void *data)
- {
-     struct ahci_ctrl_s *ctrl = data;
--    struct ahci_port_s *port;
-     u32 pnr, max;
-     int rc;
- 
-@@ -422,7 +421,7 @@ ahci_detect(void *data)
-         dprintf(1, "AHCI/%d: link %s\n", pnr, rc == 0 ? "up" : "down");
-         if (rc != 0)
-             continue;
--        port = ahci_port_init(ctrl, pnr);
-+        ahci_port_init(ctrl, pnr);
-     }
- }
- 
-diff --git a/src/bregs.h b/src/bregs.h
-index 9a381d0..f026fa8 100644
---- a/src/bregs.h
-+++ b/src/bregs.h
-@@ -37,9 +37,9 @@
- struct bregs {
-     u16 ds;
-     u16 es;
--    UREG(edi, di, di_hi, di_lo);
--    UREG(esi, si, si_hi, si_lo);
--    UREG(ebp, bp, bp_hi, bp_lo);
-+    UREG(edi, di, di8u, di8l);
-+    UREG(esi, si, si8u, si8l);
-+    UREG(ebp, bp, bp8u, bp8l);
-     UREG(ebx, bx, bh, bl);
-     UREG(edx, dx, dh, dl);
-     UREG(ecx, cx, ch, cl);
