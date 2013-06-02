@@ -1,3 +1,0 @@
-[submodule "seabios.submodule"]
-	path = seabios.submodule
-	url = git://git.seabios.org/seabios.git

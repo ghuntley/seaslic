@@ -13,14 +13,16 @@ computers ACPI tables are not exposed - which from a security pov: is good.
 # Solution:
 
 Extract the ACPI tables from the computer and embed them into the virtual
-machine BIOS and don't run more then one VM.
+machine BIOS and don't run more than one VM.
 
 # Do the dance:
 - Does /sys/firmware/acpi/tables/ exist?
     YES: Proceed.
     NO: Go away you dirty pirate.
 
+On Debian and RHEL, you need to install 'iasl' and 'vim-common' packages first.
+Then download the latest SeaBIOS version and put the archive content into 'seabios.module' catalog.
+
 - ./patch.sh
 - cp /usr/share/qemu/bios.bin /usr/share/qemu/bios-orig.bin
 - cp seabios.submodule/out/bios.bin /usr/share/qemu/bios.bin
-
