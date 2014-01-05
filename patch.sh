@@ -9,7 +9,7 @@ echo $HEADER
 echo
 
 # dump the slic table from the computer (note: requires root)
-sudo xxd -i /sys/firmware/acpi/tables/SLIC | grep -v len | sed 's/unsigned char.*/static char SLIC[] = {/' > seabios.submodule/src/acpi-slic.hex
+sudo xxd -i /sys/firmware/acpi/tables/SLIC | grep -v -E "len "| sed 's/unsigned char.*/static char SLIC[] = {/' > seabios.submodule/src/acpi-slic.hex
 
 echo
 echo $HEADER
