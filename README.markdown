@@ -1,28 +1,24 @@
-# Here's the story...
+ACPI Table Extraction / SeaBIOS SLIC Integration
+================================================
 
-- Computer purchased with w/Windows 7 preinstalled.
-- Preferred development environment is linux.
-- Sometimes have to do development in windows.
+If your computer is installed with Windows 7/8 by default but you'd prefer to run Linux as your desktop but on ocassion run a single Windows Virtual Machine under KVM using the activiation credentials within your computers BIOS then SeaSLIC can help you achieve this.
 
-# Problem:
 
-To use the license which came with the computer you have to dual boot between
-linux and windows. Running windows in a virtual machine doesn't work as the
-computers ACPI tables are not exposed - which from a security pov: is good.
+### Debian
 
-# Solution:
+As of 6th of Apr 2014 thanks to the excellent work by Michael Tokarev this patch is now integrated by default into Debian which removes the need to roll and maintain your own your own copy of SeaBIOS.
 
-Extract the ACPI tables from the computer and embed them into the virtual
-machine BIOS and don't run more than one VM.
+    # sudo xxd -i /sys/firmware/acpi/tables/SLIC | grep -v -E "len "| sed 's/unsigned char.*/static char SLIC[] = {/' > /tmp/slic.bin
 
-# Do the dance:
-- Does /sys/firmware/acpi/tables/ exist?
-    YES: Proceed.
-    NO: Go away you dirty pirate.
+    # qemu-system-x86_64 -acpitable file=[/tmp/slic.bin | /sys/firmware/acpi/tables/SLIC]
+    
 
-On Debian and RHEL, you need to install 'iasl' and 'vim-common' packages first.
-Then download the latest SeaBIOS version and put the archive content into 'seabios.module' catalog.
+### Other
 
-- ./patch.sh
-- cp /usr/share/qemu/bios.bin /usr/share/qemu/bios-orig.bin
-- cp seabios.submodule/out/bios.bin /usr/share/qemu/bios.bin
+Download the latest SeaBIOS version and put the archive content into the 'seabios.module' directory.
+
+    ./patch.sh
+    cp /usr/share/qemu/bios.bin /usr/share/qemu/bios-orig.bin
+    cp seabios.submodule/out/bios.bin /usr/share/qemu/bios.bin
+
+Please ensure that the packages 'iasl' and 'vim-common' are installed before compiling.
